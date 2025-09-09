@@ -1,2 +1,2 @@
 # ai3
-muie garda
+create your env inside this repo once you download it
