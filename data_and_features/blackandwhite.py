@@ -3,7 +3,7 @@ import os
 
 # ---- Settings ----
 # Change this to your image file path
-input_image_path = "data/2/2.1.png"
+input_image_path = "features/2/2.2.png"
 
 # Output will be saved with "_bw" suffix in the same directory
 # Or you can specify a custom output path:
