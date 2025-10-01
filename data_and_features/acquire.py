@@ -8,7 +8,7 @@ from imutils.video import VideoStream
 data_path   = 'data'          # root folder where images will be saved
 frame_size  = (320, 240)      # camera resolution (w, h)
 show_help   = True            # show on-screen help overlay
-capture_interval = 1.0        # seconds between auto-captures
+capture_interval = 0.5        # seconds between auto-captures
 
 # Classes and key bindings
 # You can press: 2..9, 0 or 't' for 10, and a/j/q/k for faces
@@ -127,12 +127,12 @@ try:
         k = cv.waitKey(1) & 0xFF
 
         # Handle quit toggles
-        if k == ord('q') or k == 27:  # q or Esc
+        if  k == 27:  # q or Esc
             if capturing:
                 # First press: stop capturing, arm quit
                 capturing = False
                 quit_armed = True
-                print("[INFO] Capture stopped. Press q/Esc again to exit, or press a class key to resume with that label.")
+                print("[INFO] Capture stopped. Press Esc again to exit, or press a class key to resume with that label.")
             else:
                 if quit_armed:
                     # Second press: exit
