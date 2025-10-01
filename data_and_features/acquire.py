@@ -2,17 +2,16 @@ import os
 import time
 import cv2 as cv
 import numpy as np
-from imutils.video import VideoStream
 
 # ---- Settings ----
 data_path   = 'data'          # root folder where images will be saved
-frame_size  = (320, 240)      # camera resolution (w, h)
+frame_size  = (1920, 1080)     # camera resolution (w, h)
 show_help   = True            # show on-screen help overlay
-capture_interval = 0.5        # seconds between auto-captures
+capture_interval = 2.0        # seconds between auto-captures
 
 # Classes and key bindings
 # You can press: 2..9, 0 or 't' for 10, and a/j/q/k for faces
-class_names = ["2","3","4","5","6","7","8","9","10","A","J","Q","K"]
+class_names = ["2","3","4","5","6","7","8","9","10","A","J","Q","K","ND"]
 
 # Map keyboard keys (ord) -> class folder name
 kMappings = {
@@ -35,6 +34,8 @@ kMappings = {
     ord('Q'): "Q",
     ord('k'): "K",
     ord('K'): "K",
+    ord('n'): "ND",
+    ord('N'): "ND",
 }
 
 # Ensure class folders exist
@@ -42,12 +43,19 @@ for name in class_names:
     os.makedirs(os.path.join(data_path, name), exist_ok=True)
 
 # Start camera
-vs = VideoStream(src=0, usePiCamera=False, resolution=frame_size).start()
+vs = cv.VideoCapture(0)
+vs.set(cv.CAP_PROP_FRAME_WIDTH, frame_size[0])
+vs.set(cv.CAP_PROP_FRAME_HEIGHT, frame_size[1])
 time.sleep(1.0)
+
+# Verify actual resolution
+actual_width = int(vs.get(cv.CAP_PROP_FRAME_WIDTH))
+actual_height = int(vs.get(cv.CAP_PROP_FRAME_HEIGHT))
+print(f"[INFO] Requested: {frame_size[0]}x{frame_size[1]}, Actual: {actual_width}x{actual_height}")
 
 print("[INFO] Ready.")
 print("  Press a class key to START auto-capture (1 img/sec):")
-print("  2-9, 0 or t/T=10, a/A=A, j/J=J, q/Q=Q, k/K=K")
+print("  2-9, 0 or t/T=10, a/A=A, j/J=J, q/Q=Q, k/K=K, n/N=ND")
 print("  Press q or Esc once to STOP capturing (app stays open).")
 print("  Press q or Esc AGAIN to EXIT.\n")
 
@@ -76,7 +84,7 @@ def draw_overlay(img):
     label_txt = current_label if current_label is not None else "-"
     lines = [
         f"Status: {status} | Label: {label_txt}",
-        "Keys: 2-9 | 0/t=10 | a=A j=J q=Q k=K | q/Esc: stop, then exit",
+        "Keys: 2-9 | 0/t=10 | a=A j=J q=Q k=K n=N | q/Esc: stop, then exit",
         "Saved: " + " ".join(f"{k}:{saved_counts[k]}" for k in class_names)
     ]
 
@@ -98,8 +106,8 @@ def draw_overlay(img):
 
 try:
     while True:
-        frame = vs.read()
-        if frame is None:
+        ret, frame = vs.read()
+        if not ret or frame is None:
             continue
 
         # Auto-capture logic
@@ -127,7 +135,7 @@ try:
         k = cv.waitKey(1) & 0xFF
 
         # Handle quit toggles
-        if  k == 27:  # q or Esc
+        if k == 27:  # q or Esc
             if capturing:
                 # First press: stop capturing, arm quit
                 capturing = False
@@ -155,7 +163,7 @@ try:
 
 finally:
     try:
-        vs.stop()
+        vs.release()
     except Exception:
         pass
     cv.destroyAllWindows()
