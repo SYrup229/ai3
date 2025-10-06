@@ -17,7 +17,7 @@ max_display_w    = 1280
 max_display_h    = 720
 
 # Classes + keys (same as your original)
-class_names = ["2","3","4","5","6","7","8","9","10","A","J","Q","K","ND"]
+class_names = ["2","3","4","5","6","7","8","9","10","A","J","Q","K","ND","EMPTY"]
 kMappings = {
     ord('2'): "2",  ord('3'): "3",  ord('4'): "4",  ord('5'): "5",
     ord('6'): "6",  ord('7'): "7",  ord('8'): "8",  ord('9'): "9",
@@ -26,7 +26,7 @@ kMappings = {
     ord('j'): "J",  ord('J'): "J",
     ord('q'): "Q",  ord('Q'): "Q",   # Queen (Esc is the only quit)
     ord('k'): "K",  ord('K'): "K",
-    ord('n'): "ND", ord('N'): "ND",
+    ord('n'): "ND", ord('N'): "ND", ord('e'): "EMPTY", ord('E'): "EMPTY",
 }
 
 # -------------- Utilities -----------------
@@ -170,7 +170,7 @@ if __name__ == "__main__":
 
     print("[INFO] Ready.")
     print("  Press a class key to START auto-capture (25 shots @ 1/s):")
-    print("  2-9, 0 or t/T=10, a/A=A, j/J=J, q/Q=Q, k/K=K, n/N=ND")
+    print("  2-9, 0 or t/T=10, a/A=A, j/J=J, q/Q=Q, k/K=K, n/N=ND, e for empty")
     print("  F = toggle fit-to-window preview,  Esc = exit\n")
 
     # Capture state
