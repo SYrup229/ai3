@@ -52,56 +52,9 @@ def load_templates(template_path):
     return templates, template_names
 
 
-def detect_card_region(img):
-    """
-    Detect the card region in the image by finding the black card on red background.
-    
-    Args:
-        img: Input image (BGR)
-        
-    Returns:
-        x, y, w, h: Bounding box of the card (or None if not found)
-    """
-    # Convert to HSV for better color segmentation
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    
-    # Create mask for black cards (low value/brightness)
-    # Black cards have low V (value) regardless of H (hue) or S (saturation)
-    lower_black = np.array([0, 0, 0])
-    upper_black = np.array([180, 255, 100])  # V < 100 for black cards
-    mask = cv2.inRange(hsv, lower_black, upper_black)
-    
-    # Clean up the mask with morphological operations
-    kernel = np.ones((5, 5), np.uint8)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    
-    # Find contours
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    if not contours:
-        return None
-    
-    # Get the largest contour (should be the card)
-    largest_contour = max(contours, key=cv2.contourArea)
-    
-    # Get bounding box
-    x, y, w, h = cv2.boundingRect(largest_contour)
-    
-    # Verify it's a reasonable size (not tiny noise)
-    img_area = img.shape[0] * img.shape[1]
-    card_area = w * h
-    
-    if card_area < img_area * 0.05:  # Card should be at least 5% of image
-        return None
-    
-    return x, y, w, h
-
-
 def extract_template_features(img, templates, template_names):
     """
     Extract template matching correlation scores as features.
-    First detects the card, then crops its top-left corner.
     
     Args:
         img: Input card image (BGR)
@@ -114,25 +67,12 @@ def extract_template_features(img, templates, template_names):
     # Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
-    # Detect card region first
-    card_bbox = detect_card_region(img)
-    
-    if card_bbox is None:
-        # If card not detected, assume it's EMPTY or use full image
-        # Return low scores for all templates
-        return np.zeros(len(template_names))
-    
-    x, y, w, h = card_bbox
-    
-    # Crop the card region
-    card_gray = gray[y:y+h, x:x+w]
-    
-    # Crop top-left corner of the CARD (not the image)
-    # Rank symbol is typically in top 30% height, left 25% width of the card
-    card_h, card_w = card_gray.shape
-    crop_h = int(card_h * 0.3)
-    crop_w = int(card_w * 0.25)
-    corner = card_gray[0:crop_h, 0:crop_w]
+    # Crop top-left corner (adjust crop region if needed)
+    # Assuming rank symbol is in top 30% height, left 25% width
+    h, w = gray.shape
+    crop_h = int(h * 0.3)
+    crop_w = int(w * 0.25)
+    corner = gray[0:crop_h, 0:crop_w]
     
     # Resize corner to match template size (70x125)
     corner_resized = cv2.resize(corner, (70, 125))
